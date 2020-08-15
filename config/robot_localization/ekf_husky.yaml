@@ -13,13 +13,13 @@ debug_out_file: ~/ekf_file.txt
 publish_tf: true
 publish_acceleration: false
 
-map_frame: map              # Defaults to "map" if unspecified
-odom_frame: ROBOTIKA_X2/odom            # Defaults to "odom" if unspecified
-base_link_frame: ROBOTIKA_X2  # Defaults to "base_link" if unspecified
-world_frame: ROBOTIKA_X2/odom           # Defaults to the value of odom_frame if unspecified
+map_frame: MARBLE_HUSKY/map              # Defaults to "map" if unspecified
+odom_frame: MARBLE_HUSKY/odom            # Defaults to "odom" if unspecified
+base_link_frame: MARBLE_HUSKY  # Defaults to "base_link" if unspecified
+world_frame: MARBLE_HUSKY/odom           # Defaults to the value of odom_frame if unspecified
 
-odom0: /ROBOTIKA_X2/odom
-imu0: /ROBOTIKA_X2/imu/data
+odom0: /MARBLE_HUSKY/odom
+imu0: /MARBLE_HUSKY/imu/data
 
 odom0_config: [true,  true,  true,
                false, false, false,
