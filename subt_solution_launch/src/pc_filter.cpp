@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
   // whether a point in a point cloud at a certain location is an obstacle or not
   ros::NodeHandle private_nh("~");
   private_nh.param<float>("flat_height", flat_height, -0.25);
-  private_nh.param<float>("slope", slope_threshold, 1.0);
+  private_nh.param<float>("slope", slope_threshold, 4.0);
   private_nh.param<std::string>("name", name, "X1");
 
   // Define transform frames

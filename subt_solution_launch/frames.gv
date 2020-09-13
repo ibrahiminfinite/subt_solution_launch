@@ -1,0 +1,21 @@
+digraph G {
+"world" -> "cave_qual"[label="Broadcaster: /tf_world_static\nAverage rate: 10000.000 Hz\nMost recent transform: 0.000 ( 808.576 sec old)\nBuffer length: 0.000 sec\n"];
+"X1/base_link/camera_front" -> "X1/base_link/camera_front_optical"[label="Broadcaster: /X1/optical_frame_publisher\nAverage rate: 10000.000 Hz\nMost recent transform: 0.000 ( 808.576 sec old)\nBuffer length: 0.000 sec\n"];
+"X1/base_link" -> "X1/base_link/camera_front"[label="Broadcaster: /X1/pose_tf_broadcaster\nAverage rate: 10000.000 Hz\nMost recent transform: 0.000 ( 808.576 sec old)\nBuffer length: 0.000 sec\n"];
+"X1" -> "X1/base_link"[label="Broadcaster: /X1/pose_tf_broadcaster\nAverage rate: 10000.000 Hz\nMost recent transform: 0.000 ( 808.576 sec old)\nBuffer length: 0.000 sec\n"];
+"X1/base_link" -> "X1/base_link/front_cliff_laser"[label="Broadcaster: /X1/pose_tf_broadcaster\nAverage rate: 10000.000 Hz\nMost recent transform: 0.000 ( 808.576 sec old)\nBuffer length: 0.000 sec\n"];
+"X1/base_link" -> "X1/base_link/front_laser"[label="Broadcaster: /X1/pose_tf_broadcaster\nAverage rate: 10000.000 Hz\nMost recent transform: 0.000 ( 808.576 sec old)\nBuffer length: 0.000 sec\n"];
+"X1/base_link" -> "X1/base_link/imu_sensor"[label="Broadcaster: /X1/pose_tf_broadcaster\nAverage rate: 10000.000 Hz\nMost recent transform: 0.000 ( 808.576 sec old)\nBuffer length: 0.000 sec\n"];
+"X1" -> "X1/rear_right_wheel_link"[label="Broadcaster: /X1/pose_tf_broadcaster\nAverage rate: 250.295 Hz\nMost recent transform: 808.576 ( 0.000 sec old)\nBuffer length: 3.388 sec\n"];
+"X1" -> "X1/rear_left_wheel_link"[label="Broadcaster: /X1/pose_tf_broadcaster\nAverage rate: 250.295 Hz\nMost recent transform: 808.576 ( 0.000 sec old)\nBuffer length: 3.388 sec\n"];
+"X1" -> "X1/front_right_wheel_link"[label="Broadcaster: /X1/pose_tf_broadcaster\nAverage rate: 250.295 Hz\nMost recent transform: 808.576 ( 0.000 sec old)\nBuffer length: 3.388 sec\n"];
+"X1" -> "X1/front_left_wheel_link"[label="Broadcaster: /X1/pose_tf_broadcaster\nAverage rate: 250.295 Hz\nMost recent transform: 808.576 ( 0.000 sec old)\nBuffer length: 3.388 sec\n"];
+edge [style=invis];
+ subgraph cluster_legend { style=bold; color=black; label ="view_frames Result";
+"Recorded at time: 808.576"[ shape=plaintext ] ;
+ }->"world";
+edge [style=invis];
+ subgraph cluster_legend { style=bold; color=black; label ="view_frames Result";
+"Recorded at time: 808.576"[ shape=plaintext ] ;
+ }->"X1";
+}

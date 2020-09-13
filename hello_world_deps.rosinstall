@@ -9,5 +9,14 @@ repositories:
     version: master
   m-explore:
     type: git
-    url: https://github.com/hrnr/m-explore.git
-    version: melodic-devel
+    url: https://github.com/ibrahiminfinite/m-explore.git
+    version: subt_mod
+  robot_pose_publisher:
+    type: git
+    url: https://github.com/ibrahiminfinite/robot_pose_publisher.git
+    version: subt_mod
+
+
+
+
+

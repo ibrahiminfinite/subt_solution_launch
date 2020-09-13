@@ -101,5 +101,5 @@ install(DIRECTORY config/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/config
 )
 
-catkin_install_python(PROGRAMS scripts/simple_solution.py
+catkin_install_python(PROGRAMS scripts/simple_solution.py scripts/robot_position_listner.py scripts/autonomous_test.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
