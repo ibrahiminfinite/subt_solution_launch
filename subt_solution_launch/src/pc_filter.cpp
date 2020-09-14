@@ -1,5 +1,6 @@
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
+#include <geometry_msgs/Pose.h>
 #include <pcl/filters/passthrough.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/point_cloud.h>
@@ -20,23 +21,34 @@ std::string new_frame;
 ros::Publisher filtered_pc_pub;
 tf2_ros::Buffer tf_buffer;
 
+
+
 // The callback method for the subscriber.
 // Receives the original point cloud data, filters it, and then
 // publishes this filtered point cloud to a new topic
 void filter_pc(const sensor_msgs::PointCloud2::ConstPtr & pc);
+
+
+void chatterCallback(const geometry_msgs::Pose::ConstPtr& msg)
+{
+  flat_height = msg->position.z;
+}
 
 int main(int argc, char *argv[])
 {
   // Start node
   ros::init(argc, argv, "pc_filter");
   ros::NodeHandle nh;
-
+  
   // Set up parameters.
   // The slope parameter is the upper bound of a height to distance ratio that determines
   // whether a point in a point cloud at a certain location is an obstacle or not
   ros::NodeHandle private_nh("~");
-  private_nh.param<float>("flat_height", flat_height, -0.25);
-  private_nh.param<float>("slope", slope_threshold, 4.0);
+
+  
+
+  private_nh.param<float>("flat_height", flat_height, 0.1);
+  private_nh.param<float>("slope", slope_threshold, 6.0);
   private_nh.param<std::string>("name", name, "X1");
 
   // Define transform frames
@@ -49,8 +61,9 @@ int main(int argc, char *argv[])
   tf2_ros::TransformListener tf_listener(tf_buffer);
 
   // Subscribe to the original point cloud topic
+  ros::Subscriber sub = nh.subscribe("X1/robot_pose", 1, chatterCallback);
   ros::Subscriber original_pc_sub = nh.subscribe("points", 1, &filter_pc);
-
+  
   // Start listening for data and trigger the callback when possible
   ros::spin();
 }

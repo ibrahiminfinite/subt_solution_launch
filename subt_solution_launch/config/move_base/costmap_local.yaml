@@ -4,3 +4,9 @@ rolling_window: true
 plugins:
   - {name: obstacles_laser,           type: "costmap_2d::ObstacleLayer"}
   - {name: inflation,                 type: "costmap_2d::InflationLayer"}
+
+inflation:
+  inflation_radius: 14.0
+  cost_scaling_factor: 5.0
+obstacle:
+  max_obstacle_height: 1

@@ -11,6 +11,18 @@
       <arg name="type" value="x1"/>
     </include>
 
+    <!-- <node pkg="subt_solution_launch" type="artifact_origin_finder" name="artifact_origin_finder">
+      <param name="robot_name" value="$(arg name)" />
+    </node>
+
+    <node pkg="subt_solution_launch" type="artifact_reporter" name="artifact_reporter">
+      <param name="robot_name" value="$(arg name)" />
+    </node>
+
+
+    <include file="$(find subt_solution_launch)/launch/yolo_v3-tiny.launch" /> -->
+
+
     <node pkg="subt_solution_launch" type="base_link_flattener" name="base_link_flattener">
       <param name="name" value="$(arg name)"/>
     </node>
@@ -32,11 +44,10 @@
       <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS"/>
       <param name="recovery_behavior_enabled" value="False"/>
       <param name="max_planning_retries" value="3"/>
-      <param name="planner_frequency" value="0"/>
+      <param name="planner_frequency" value="3"/>
       <param name="oscillation_timeout" value="3"/>
-      
-      
-
+      <param name="planner_patience" value="2"/>
+       
       <rosparam file="$(find subt_solution_launch)/config/move_base/planner.yaml" command="load" />
 
       <rosparam file="$(find subt_solution_launch)/config/move_base/costmap_common.yaml" command="load" ns="global_costmap" />
