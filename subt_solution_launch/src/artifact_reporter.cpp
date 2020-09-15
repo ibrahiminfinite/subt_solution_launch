@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
   artifact_thresh = 0.6;
   artifact_presence_conf = 0;
   max_dist = 8;
-  max_dist_thresh = max_dist/2;
+  max_dist_thresh = 6;
 
   ros::NodeHandle private_nh("~");
   private_nh.param("robot_name", robot_name, std::string("X1"));
