@@ -6,7 +6,7 @@ plugins:
   - {name: inflation,                 type: "costmap_2d::InflationLayer"}
 
 inflation:
-  inflation_radius: 14.0
-  cost_scaling_factor: 5.0
+  inflation_radius: 3.0
+  cost_scaling_factor: 18.0
 obstacle:
-  max_obstacle_height: 1
+  max_obstacle_height: 2

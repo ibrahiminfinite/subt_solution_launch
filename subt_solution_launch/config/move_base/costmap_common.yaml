@@ -8,8 +8,6 @@ transform_tolerance: 0.5
 
 resolution: 0.05
 
-obstacle_range: 50
-raytrace_range: 50
 
 obstacles_laser:
   observation_sources: point_cloud_sensor
@@ -20,3 +18,13 @@ obstacles_laser:
     topic: /X1/points_filtered
   }
 
+
+inflation:
+  inflation_radius: 3.0
+  cost_scaling_factor: 100.0
+obstacle:
+  max_obstacle_height: 2
+  
+
+obstacle_range: 70
+raytrace_range: 70

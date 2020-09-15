@@ -29,10 +29,10 @@ tf2_ros::Buffer tf_buffer;
 void filter_pc(const sensor_msgs::PointCloud2::ConstPtr & pc);
 
 
-void chatterCallback(const geometry_msgs::Pose::ConstPtr& msg)
-{
-  flat_height = msg->position.z;
-}
+// void chatterCallback(const geometry_msgs::Pose::ConstPtr& msg)
+// {
+//   flat_height = msg->position.z;
+// }
 
 int main(int argc, char *argv[])
 {
@@ -47,8 +47,8 @@ int main(int argc, char *argv[])
 
   
 
-  private_nh.param<float>("flat_height", flat_height, 0.1);
-  private_nh.param<float>("slope", slope_threshold, 6.0);
+  private_nh.param<float>("flat_height", flat_height, -0.25);
+  private_nh.param<float>("slope", slope_threshold, 1.5);
   private_nh.param<std::string>("name", name, "X1");
 
   // Define transform frames
@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
   tf2_ros::TransformListener tf_listener(tf_buffer);
 
   // Subscribe to the original point cloud topic
-  ros::Subscriber sub = nh.subscribe("X1/robot_pose", 1, chatterCallback);
+  // ros::Subscriber sub = nh.subscribe("X1/robot_pose", 1, chatterCallback);
   ros::Subscriber original_pc_sub = nh.subscribe("points", 1, &filter_pc);
   
   // Start listening for data and trigger the callback when possible

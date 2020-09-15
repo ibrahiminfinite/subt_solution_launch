@@ -4,7 +4,11 @@ include "trajectory_builder.lua"
 MAP_BUILDER.use_trajectory_builder_3d = true
 MAP_BUILDER.num_background_threads = 7
 
+TRAJECTORY_BUILDER_3D.min_range = .3
+TRAJECTORY_BUILDER_3D.max_range = 70
+
 TRAJECTORY_BUILDER_3D.num_accumulated_range_data = 1
+
 
 POSE_GRAPH.optimization_problem.huber_scale = 5e2
 POSE_GRAPH.optimize_every_n_nodes = 30
