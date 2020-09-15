@@ -158,10 +158,10 @@ void ProcessDetection(
   for (const auto & box : bb_msg->bounding_boxes)
   {
     // make sure the detection is not a false positive
-    if ((box.Class != "backpack") && (box.Class != "suitcase"))
-    {
-      continue;
-    }
+    // if ((box.Class != "bag") && (box.Class != "suitcase"))
+    // {
+    //   continue;
+    // }
 
     // take the centroid of the points in the bounding box to get the artifact's location
     // (we'll need to crop the original point cloud to just the points in the bounding box)
@@ -173,6 +173,23 @@ void ProcessDetection(
     auto tf_stamped = ToTransformStamped(centroid, camera_frame, object_frame);
     auto scoring_pose = tf_buffer.transform<geometry_msgs::PoseStamped>(
       centroid, artifact_origin_frame, ros::Duration(1.0));
+    
+    if (box.Class == "bag")
+    {
+      artifact_to_report.type = subt::ArtifactType::TYPE_BACKPACK;
+    }
+    else if (box.Class == "rope")
+    {
+      artifact_to_report.type = subt::ArtifactType::TYPE_ROPE;
+    }
+    else if (box.Class == "helmet")
+    {
+      artifact_to_report.type = subt::ArtifactType::TYPE_HELMET;
+    }
+    else if (box.Class == "randy")
+    {
+      artifact_to_report.type = subt::ArtifactType::TYPE_RESCUE_RANDY;
+    }
     
     artifact_to_report.type = subt::ArtifactType::TYPE_BACKPACK;
     artifact_to_report.location.x = scoring_pose.pose.position.x;
