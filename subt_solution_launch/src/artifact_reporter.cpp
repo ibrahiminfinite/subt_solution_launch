@@ -143,7 +143,7 @@ void BaseStationCallback(
 void ReportArtifacts(const ros::TimerEvent &, subt::CommsClient & commsClient)
 {
   bool commret;
-  
+
   std_msgs::Bool msg;
   msg.data = have_an_artifact_to_report;
   artifact_found_pub.publish(msg);
@@ -189,11 +189,6 @@ void ProcessDetection(
 {
   for (const auto & box : bb_msg->bounding_boxes)
   {
-    // make sure the detection is not a false positive
-    // if ((box.Class != "bag") && (box.Class != "suitcase"))
-    // {
-    //   continue;
-    // }
 
     if (box.probability < artifact_thresh)
     {
@@ -235,25 +230,20 @@ void ProcessDetection(
       // the artifact origin instead of the camera
       ROS_INFO_STREAM("Artifact report ready");
 
-      // std_msgs::String msg;
-      // std::stringstream ss;
-      // ss<<box.Class;
-      // msg.data = ss.str();
 
 
       auto tf_stamped = ToTransformStamped(centroid, camera_frame, object_frame);
       //Todo - uncomment
-      // auto scoring_pose = tf_buffer.transform<geometry_msgs::PoseStamped>(
-      //   centroid, artifact_origin_frame, ros::Duration(1.0));
+      auto scoring_pose = tf_buffer.transform<geometry_msgs::PoseStamped>(
+        centroid, artifact_origin_frame, ros::Duration(1.0));
       
 
       
       //Todo - uncomment
-      // artifact_to_report.location.x = scoring_pose.pose.position.x;
-      // artifact_to_report.location.y = scoring_pose.pose.position.y;
-      // artifact_to_report.location.z = scoring_pose.pose.position.z;
+      artifact_to_report.location.x = scoring_pose.pose.position.x;
+      artifact_to_report.location.y = scoring_pose.pose.position.y;
+      artifact_to_report.location.z = scoring_pose.pose.position.z;
       have_an_artifact_to_report = true;
-      // artifact_found_pub.publish(msg);
 
       ROS_INFO_STREAM("Detected a "<<box.Class<<" Location w.r.t "
         << artifact_origin_frame << " : "
