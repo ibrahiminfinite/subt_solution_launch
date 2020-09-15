@@ -19,6 +19,9 @@
 #include "tf2_ros/transform_broadcaster.h"
 #include "tf2_ros/transform_listener.h"
 #include "ToTransformStamped.h"
+#include "std_msgs/String.h"
+#include "std_msgs/Bool.h"
+
 
 std::string robot_name;
 std::string camera_frame;
@@ -26,6 +29,13 @@ std::string object_frame;
 std::string artifact_origin_frame;
 std::string rgbd_pc_topic;
 std::string darknet_bb_topic;
+
+std::vector<subt::ArtifactType> artifact_blacklist;
+float artifact_thresh;
+int artifact_presence_conf;
+int max_dist;
+int max_dist_thresh;
+ros::Publisher artifact_found_pub;
 
 // define the fundamental traits of an artifact (type and location),
 // and report the most recently found artifact
@@ -61,6 +71,11 @@ int main(int argc, char *argv[])
   ros::init(argc, argv, "artifact_reporter");
   ros::NodeHandle nh;
 
+  artifact_thresh = 0.6;
+  artifact_presence_conf = 0;
+  max_dist = 8;
+  max_dist_thresh = max_dist/2;
+
   ros::NodeHandle private_nh("~");
   private_nh.param("robot_name", robot_name, std::string("X1"));
   private_nh.param("camera_frame", camera_frame, robot_name + "/base_link/camera_front");
@@ -74,6 +89,9 @@ int main(int argc, char *argv[])
     "artifact_origin_frame: " << artifact_origin_frame << std::endl <<
     "rgbd_pc_topic: " << rgbd_pc_topic << std::endl <<
     "darknet_bb_topic: " << darknet_bb_topic << std::endl);
+
+  // artifact_found_pub = nh.advertise<std_msgs::String>("artifact_found_pub", 1000);
+  artifact_found_pub = nh.advertise<std_msgs::Bool>("artifact_found_pub", 1000);
 
   tf2_ros::Buffer tf_buffer;
   tf2_ros::TransformListener tf_listener(tf_buffer);
@@ -91,6 +109,7 @@ int main(int argc, char *argv[])
   message_filters::Subscriber<darknet_ros_msgs::BoundingBoxes> bb_sub(nh, darknet_bb_topic, 1);
   message_filters::TimeSynchronizer<sensor_msgs::PointCloud2, darknet_ros_msgs::BoundingBoxes> sync(pc_sub, bb_sub, 10);
   sync.registerCallback(boost::bind(&ProcessDetection, _1, _2, boost::ref(tf_buffer)));
+  
 
   ros::spin();
 }
@@ -123,6 +142,12 @@ void BaseStationCallback(
 
 void ReportArtifacts(const ros::TimerEvent &, subt::CommsClient & commsClient)
 {
+  bool commret;
+  
+  std_msgs::Bool msg;
+  msg.data = have_an_artifact_to_report;
+  artifact_found_pub.publish(msg);
+
   if (!have_an_artifact_to_report)
   {
     return;
@@ -147,7 +172,14 @@ void ReportArtifacts(const ros::TimerEvent &, subt::CommsClient & commsClient)
   }
 
   // report the artifact
-  commsClient.SendTo(serializedData, subt::kBaseStationName);
+  commret = commsClient.SendTo(serializedData, subt::kBaseStationName);
+  if(!commret)
+  {
+    ROS_INFO_STREAM("Report send failed!");
+  }
+  // artifact_blacklist.push_back(artifact_to_report.type);
+  // have_an_artifact_to_report = false;
+
 }
 
 void ProcessDetection(
@@ -163,17 +195,11 @@ void ProcessDetection(
     //   continue;
     // }
 
-    // take the centroid of the points in the bounding box to get the artifact's location
-    // (we'll need to crop the original point cloud to just the points in the bounding box)
-    auto cropped_pc = CropPointCloud(cloud_msg, box);
-    auto centroid = GetCentroid(cropped_pc);
+    if (box.probability < artifact_thresh)
+    {
+      continue;
+    }
 
-    // perform the necessary transforms to get the artifact's location with respect to
-    // the artifact origin instead of the camera
-    auto tf_stamped = ToTransformStamped(centroid, camera_frame, object_frame);
-    auto scoring_pose = tf_buffer.transform<geometry_msgs::PoseStamped>(
-      centroid, artifact_origin_frame, ros::Duration(1.0));
-    
     if (box.Class == "bag")
     {
       artifact_to_report.type = subt::ArtifactType::TYPE_BACKPACK;
@@ -186,24 +212,62 @@ void ProcessDetection(
     {
       artifact_to_report.type = subt::ArtifactType::TYPE_HELMET;
     }
-    else if (box.Class == "randy")
+    else
     {
       artifact_to_report.type = subt::ArtifactType::TYPE_RESCUE_RANDY;
     }
-    
-    artifact_to_report.type = subt::ArtifactType::TYPE_BACKPACK;
-    artifact_to_report.location.x = scoring_pose.pose.position.x;
-    artifact_to_report.location.y = scoring_pose.pose.position.y;
-    artifact_to_report.location.z = scoring_pose.pose.position.z;
-    have_an_artifact_to_report = true;
 
-    ROS_INFO_STREAM("Detected a backapack! Location w.r.t "
-      << artifact_origin_frame << " : "
-      << artifact_to_report.location.x << ", "
-      << artifact_to_report.location.y << ", "
-      << artifact_to_report.location.z
-      << " (x,y,z)");
+    // if (std::find(artifact_blacklist.begin(), artifact_blacklist.end(), artifact_to_report.type) != artifact_blacklist.end())
+    // {
+    //   ROS_INFO_STREAM("Duplication");
+    //   continue;
+    // }
+
+    // take the centroid of the points in the bounding box to get the artifact's location
+    // (we'll need to crop the original point cloud to just the points in the bounding box)
+    auto cropped_pc = CropPointCloud(cloud_msg, box);
+    auto centroid = GetCentroid(cropped_pc);
+
+    if ((centroid.pose.position.x > 0) && (centroid.pose.position.x < max_dist_thresh))
+    {
+      // std::cout<<"box p c: "<<artifact_presence_conf<<std::endl;
+      // perform the necessary transforms to get the artifact's location with respect to
+      // the artifact origin instead of the camera
+      ROS_INFO_STREAM("Artifact report ready");
+
+      // std_msgs::String msg;
+      // std::stringstream ss;
+      // ss<<box.Class;
+      // msg.data = ss.str();
+
+
+      auto tf_stamped = ToTransformStamped(centroid, camera_frame, object_frame);
+      //Todo - uncomment
+      // auto scoring_pose = tf_buffer.transform<geometry_msgs::PoseStamped>(
+      //   centroid, artifact_origin_frame, ros::Duration(1.0));
+      
+
+      
+      //Todo - uncomment
+      // artifact_to_report.location.x = scoring_pose.pose.position.x;
+      // artifact_to_report.location.y = scoring_pose.pose.position.y;
+      // artifact_to_report.location.z = scoring_pose.pose.position.z;
+      have_an_artifact_to_report = true;
+      // artifact_found_pub.publish(msg);
+
+      ROS_INFO_STREAM("Detected a "<<box.Class<<" Location w.r.t "
+        << artifact_origin_frame << " : "
+        << artifact_to_report.location.x << ", "
+        << artifact_to_report.location.y << ", "
+        << artifact_to_report.location.z
+        << " (x,y,z)");
+    }else
+    {
+      std::cout<<"artifact :"<<box.Class<<" not in range."<<std::endl;
+
+    }
   }
+
 }
 
 sensor_msgs::PointCloud2 CropPointCloud(
