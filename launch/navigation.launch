@@ -63,6 +63,15 @@
 
 
     <node type="rviz" name="rviz" pkg="rviz" args="-d $(find subt_solution_launch)/config/husky_carto.rviz" />
+    <node pkg="subt_solution_launch" type="artifact_origin_finder" name="artifact_origin_finder">
+      <param name="robot_name" value="$(arg name)" />
+    </node>
 
+    <node pkg="subt_solution_launch" type="artifact_reporter" name="artifact_reporter">
+      <param name="robot_name" value="$(arg name)" />
+    </node>
+  
   </group>
+  
+  <include file="$(find subt_solution_launch)/launch/yolo_v2_subt_tiny.launch" />
 </launch>

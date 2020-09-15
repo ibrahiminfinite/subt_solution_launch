@@ -40,13 +40,15 @@ int main(int argc, char *argv[])
   subt_msgs::PoseFromArtifact srv;
   srv.request.robot_name.data = robot_name;
 
+  while(!tf_buffer.canTransform(map_frame, base_link_frame, ros::Time(0), ros::Duration(5.0))){
   // ensure that transform between map->base_link is available before calling service
   if (!tf_buffer.canTransform(map_frame, base_link_frame, ros::Time(0), ros::Duration(5.0)))
   {
     ROS_FATAL("could not find transform between map and base_link, exiting now");
-    ros::shutdown();
+    // ros::shutdown();
+    continue;
   }
-
+  }
   // call service and save transforms
   if (client.call(srv))
   {

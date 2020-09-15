@@ -20,6 +20,8 @@
 #include "tf2_ros/transform_listener.h"
 #include "ToTransformStamped.h"
 
+#include "std_msgs/Bool.h"
+
 std::string robot_name;
 std::string camera_frame;
 std::string object_frame;
@@ -57,6 +59,8 @@ sensor_msgs::PointCloud2 CropPointCloud(
 
 geometry_msgs::PoseStamped GetCentroid(sensor_msgs::PointCloud2 & original_pc);
 
+ros::Publisher pub;
+
 int main(int argc, char *argv[])
 {
   ros::init(argc, argv, "artifact_reporter");
@@ -86,7 +90,7 @@ int main(int argc, char *argv[])
   message_filters::Subscriber<darknet_ros_msgs::BoundingBoxes> bb_sub(nh, darknet_bb_topic, 1);
   message_filters::TimeSynchronizer<sensor_msgs::PointCloud2, darknet_ros_msgs::BoundingBoxes> sync(pc_sub, bb_sub, 10);
   sync.registerCallback(boost::bind(&ProcessDetection, _1, _2, boost::ref(tf_buffer)));
-
+  pub = nh.advertise<std_msgs::Bool>("X1/report", 1);
   ros::spin();
 }
 
@@ -103,11 +107,19 @@ void IncomingMsgCallback(
 
 void RelayArtifact(const ros::TimerEvent &, subt::CommsClient & commsClient)
 {
+  std_msgs::Bool to_report;
   if (!have_an_artifact_to_report)
   {
+    to_report.data = false;
+    pub.publish(to_report);
     return;
   }
+  else{
+    
+    to_report.data = true;
+    pub.publish(to_report);
 
+  }
   auto location = artifact_to_report.location;
   ignition::msgs::Pose pose;
   pose.mutable_position()->set_x(location.x);
